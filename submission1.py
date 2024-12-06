@@ -1,4 +1,5 @@
 # %% [code]
+# %% [code]
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -16,6 +17,11 @@ from sklearn.pipeline import make_pipeline
 data = pd.read_parquet("/kaggle/input/msdb-2024/train.parquet")
 data.head()
 
+date_columns = ["date"]
+categorical_columns = ["counter_name", "site_name"]
+numeric_columns = ["latitude", "longitude"]
+
+categorical_columns
 ### Data Preprocessing
 
 import os
@@ -412,11 +418,6 @@ X_test_preprocessed = preprocess_datetime(test_data)
 cat_features_indices = [X_test_preprocessed.columns.get_loc(col) for col in categorical_columns]  # Indices of categorical columns
 test_pool = Pool(data=X_test_preprocessed, cat_features=cat_features_indices)
 
-date_columns = ["date"]
-categorical_columns = ["counter_name", "site_name"]
-numeric_columns = ["latitude", "longitude"]
-
-categorical_columns
 
 from catboost import Pool
 
