@@ -1,5 +1,4 @@
 # %% [code]
-# %% [code]
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -413,10 +412,6 @@ test_data
 
 X_test = test_data
 X_test_preprocessed = preprocess_datetime(test_data)
-
-# Prepare CatBoost Pool for prediction
-cat_features_indices = [X_test_preprocessed.columns.get_loc(col) for col in categorical_columns]  # Indices of categorical columns
-test_pool = Pool(data=X_test_preprocessed, cat_features=cat_features_indices)
 
 
 from catboost import Pool
