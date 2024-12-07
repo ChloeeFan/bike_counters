@@ -68,7 +68,7 @@ def get_cv(X, y, random_state=0):
         yield train_idx, rng.choice(test_idx, size=len(test_idx) // 3, replace=False)
 
 
-def get_train_data(path="~/Desktop/python X/Project/train.parquet"):
+def get_train_data(path="/kaggle/input/msdb-2024/train.parquet"):
     data = pd.read_parquet(path)
     # Sort by date first, so that time based cross-validation would produce correct results
     data = data.sort_values(["date", "counter_name"])
@@ -101,7 +101,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
-from sklearn.metrics import root_mean_squared_error
 
 target_column = "log_bike_count"
 
@@ -215,8 +214,26 @@ lgbm_preds_valid = lgbm_model.predict(X_valid_preprocessed)
 lgbm_rmse = mean_squared_error(y_valid, lgbm_preds_valid, squared=False)
 print(f"LightGBM Validation RMSE: {lgbm_rmse:.5f}")
 
-# Weighted Ensemble
-final_preds_valid = 0.5 * cat_preds_valid + 0.3 * xgb_preds_valid + 0.2 * lgbm_preds_valid
+
+# Calculate inverse RMSE and normalize weights
+inverse_rmse = {
+    "xgb": 1 / xgb_rmse,
+    "cat": 1 / cat_rmse,
+    "lgbm": 1 / lgbm_rmse,
+}
+
+total_inverse_rmse = sum(inverse_rmse.values())
+weights = {model: value / total_inverse_rmse for model, value in inverse_rmse.items()}
+
+# Print weights for transparency
+print(f"Model Weights: {weights}")
+
+# Weighted Ensemble for Validation
+final_preds_valid = (
+    weights["cat"] * cat_preds_valid +
+    weights["xgb"] * xgb_preds_valid +
+    weights["lgbm"] * lgbm_preds_valid
+)
 final_rmse_valid = mean_squared_error(y_valid, final_preds_valid, squared=False)
 print(f"Weighted Ensemble - Validation RMSE: {final_rmse_valid:.5f}")
 
@@ -230,7 +247,12 @@ cat_preds_test = cat_model.predict(Pool(data=X_test_preprocessed, cat_features=c
 xgb_preds_test = xg_model.predict(X_test_preprocessed)
 lgbm_preds_test = lgbm_model.predict(X_test_preprocessed)
 
-final_preds_test = 0.5 * cat_preds_test + 0.3 * xgb_preds_test + 0.2 * lgbm_preds_test
+# Weighted Ensemble for Test Data
+final_preds_test = (
+    weights["cat"] * cat_preds_test +
+    weights["xgb"] * xgb_preds_test +
+    weights["lgbm"] * lgbm_preds_test
+)
 
 # Save Submission
 submission = pd.DataFrame(
