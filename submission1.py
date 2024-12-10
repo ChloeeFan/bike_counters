@@ -39,13 +39,14 @@ external_data["date"] = pd.to_datetime(external_data["date"])
 
 # Select relevant columns from the weather dataset
 # Example: Keep 'date', 't' (temperature), 'u' (humidity), 'rr1' (rainfall in 1 hour)
-weather_data = external_data[["date", "t", "u", "rr1"]]  # Adjust based on relevant columns
+weather_data = external_data[["date", "t", "td","ff","rr6"]]  # Adjust based on relevant columns
 
 # Merge datasets on the 'date' column
 merged_data = pd.merge(data, weather_data, on="date", how="left")
-merged_data["t"].fillna(merged_data["t"].mean(), inplace=True)  # Fill missing temperature with the mean
-merged_data["u"].fillna(merged_data["u"].median(), inplace=True)  # Fill missing humidity with the median
-merged_data["rr1"].fillna(0, inplace=True)
+merged_data["t"].fillna(merged_data["t"].mean(), inplace=True)           # Fill temperature with mean
+merged_data["td"].fillna(merged_data["td"].median(), inplace=True)       # Fill dew point temperature with median        # Fill humidity with median
+merged_data["ff"].fillna(merged_data["ff"].median(), inplace=True)       # Fill wind speed with median                              # Fill rainfall (3 hours) with 0
+merged_data["rr6"].fillna(0, inplace=True)
 
 
 data = merged_data
@@ -53,7 +54,7 @@ data = merged_data
 
 date_columns = ["date"]
 categorical_columns = ["counter_name", "site_name"]
-numeric_columns = ["latitude", "longitude","t", "u", "rr1"]
+numeric_columns = ["latitude", "longitude", "t", "td","ff","rr6"]
 
 import os
 
@@ -455,13 +456,15 @@ external_data["date"] = pd.to_datetime(external_data["date"])
 
 # Select relevant columns from the weather dataset
 # Example: Keep 'date', 't' (temperature), 'u' (humidity), 'rr1' (rainfall in 1 hour)
-weather_data = external_data[["date", "t", "u", "rr1"]]  # Adjust based on relevant columns
+# Example: Keep 'date', 't' (temperature), 'u' (humidity), 'rr1' (rainfall in 1 hour)
+weather_data = external_data[["date", "t", "td","ff","rr6"]]  # Adjust based on relevant columns
 
 # Merge datasets on the 'date' column
 merged_data = pd.merge(test_data, weather_data, on="date", how="left")
-merged_data["t"].fillna(merged_data["t"].mean(), inplace=True)  # Fill missing temperature with the mean
-merged_data["u"].fillna(merged_data["u"].median(), inplace=True)  # Fill missing humidity with the median
-merged_data["rr1"].fillna(0, inplace=True)
+merged_data["t"].fillna(merged_data["t"].mean(), inplace=True)           # Fill temperature with mean
+merged_data["td"].fillna(merged_data["td"].median(), inplace=True)       # Fill dew point temperature with median        # Fill humidity with median
+merged_data["ff"].fillna(merged_data["ff"].median(), inplace=True)       # Fill wind speed with median                              # Fill rainfall (3 hours) with 0
+merged_data["rr6"].fillna(0, inplace=True)
 
 test_data = merged_data
 
